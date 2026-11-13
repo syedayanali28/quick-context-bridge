@@ -136,7 +136,7 @@
 
   Object.defineProperty(window, '__quickContextBridge', {
     value: Object.freeze({
-      version: 2,
+      version: 3, // 3 = adds test runs + run inspection to the allowlists
       hasAuth: () => !!auth,
       authAgeMs: () => (auth ? Date.now() - auth.seenAt : null),
       request,

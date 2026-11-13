@@ -5,8 +5,7 @@
 //                             └────────── POST /ext/result ◀────────┘
 //
 // - Binds to 127.0.0.1 only. Every request must carry the pairing token (header x-qcb-token).
-// - Extension endpoints additionally require a chrome-extension:// Origin, so a web page can't pose as the
-//   extension even if it guessed the port.
+// - Extension endpoints reject web-page Origins (a missing Origin is allowed: Chrome omits it on extension GETs).
 // - No dependencies; runs on Node 18+ (or VS Code's Electron in Node mode).
 
 import http from 'node:http';
@@ -98,7 +97,11 @@ export function createBridgeServer(opts) {
 
       // ---------------- extension side ----------------
       if (url.pathname.startsWith('/ext/')) {
-        if (!String(req.headers.origin || '').startsWith('chrome-extension://')) { send(res, 403, { error: 'extension origin required' }); return; }
+        // Chrome omits Origin on GETs from an extension that has host permission, so allow a missing Origin
+        // but reject any web-page Origin. (A page can't send the x-qcb-token header without a CORS preflight
+        // that carries its Origin, so the token + this check keep web pages out.)
+        const origin = req.headers.origin;
+        if (origin && !String(origin).startsWith('chrome-extension://')) { send(res, 403, { error: 'extension origin required' }); return; }
         ext = { ...ext, connected: true, lastSeen: Date.now() };
         if (url.pathname === '/ext/hello' && req.method === 'POST') {
           ext.info = await readBody(req);

@@ -40,9 +40,27 @@ export class BridgeClient {
     return res.result;
   }
 
-  /** {ok, status, body} from the page hook. kind = 'read' | 'write'. */
-  async call(kind, path, { method, body, tabId } = {}) {
-    return this.cmd('call', { kind, path, method: method || (kind === 'read' ? 'GET' : 'POST'), body, tabId }, 180_000);
+  /**
+   * {ok, status, body} from the page hook. kind = 'read' | 'write'.
+   * Routed through a Quick tab of the same automation group (tabs can be in other groups/regions).
+   */
+  async call(kind, path, { method, body, tabId, groupId } = {}) {
+    const g = groupId || (String(path).match(/\/automation-groups\/([0-9a-f-]{36})/) || [])[1] || this.lastGroup;
+    if (g) this.lastGroup = g;
+    const tab = tabId || (g ? await this.tabFor(g) : undefined);
+    return this.cmd('call', { kind, path, method: method || (kind === 'read' ? 'GET' : 'POST'), body, tabId: tab }, 180_000);
+  }
+
+  /** A ready Quick tab (hook v2 + session) on the same host as a tab showing this group. */
+  async tabFor(groupId) {
+    if (!this.tabCache || Date.now() - this.tabCache.at > 60_000) this.tabCache = { at: Date.now(), tabs: await this.cmd('tabs', {}, 30_000) };
+    const ready = this.tabCache.tabs.filter((t) => t.hookVersion >= 2 && t.auth)
+      .sort((a, b) => Number(b.hookVersion) - Number(a.hookVersion)); // newest page hook first
+    const exact = ready.find((t) => t.ids && t.ids.groupId === groupId);
+    if (exact) return exact.tabId;
+    const host = (this.tabCache.tabs.find((t) => t.ids && t.ids.groupId === groupId) || {}).url;
+    const sameHost = host && ready.find((t) => new URL(t.url).host === new URL(host).host);
+    return sameHost ? sameHost.tabId : undefined;
   }
 
   async read(path, opts = {}) {
@@ -331,8 +349,12 @@ export async function runActions(client, target, executionArn) {
 export async function run(client, target, { input, timeoutSec = 900, pollSec = 5, log = () => {} } = {}) {
   assertAllowed(target);
   const workflow = await client.read(`${base(target)}/workflow`);
-  const start = await client.call('write', '/start/automation-groups/workflow-executions', { method: 'POST', body: startRunBody(workflow, input) });
-  if (!start.ok) throw new Error(`start failed HTTP ${start.status}: ${JSON.stringify(start.body).slice(0, 400)}`);
+  const start = await client.call('write', '/start/automation-groups/workflow-executions', { method: 'POST', body: startRunBody(workflow, input), groupId: target.groupId });
+  if (!start.ok) {
+    const msg = JSON.stringify(start.body).slice(0, 400);
+    if (/write allowlist/.test(msg)) throw new Error('The Quick tab runs an older page hook without test runs: reload the extension, press F5 on a Quick tab of this group, click any Quick tab once, then retry.');
+    throw new Error(`start failed HTTP ${start.status}: ${msg}`);
+  }
   const executionArn = findArn(start.body);
   if (!executionArn) throw new Error(`start returned no execution ARN: ${JSON.stringify(start.body).slice(0, 300)}`);
   log(`Run started: ${executionArn}`);

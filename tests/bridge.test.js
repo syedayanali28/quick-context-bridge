@@ -57,6 +57,8 @@ test('bridge server rejects bad tokens and non-extension origins', async () => {
     assert.equal((await req(port, 'GET', '/status', { headers: { 'x-qcb-token': 'nope' } })).status, 401);
     assert.equal((await req(port, 'GET', '/ext/poll', { headers: { 'x-qcb-token': TOKEN, origin: 'https://evil.example' } })).status, 403);
     assert.equal((await req(port, 'GET', '/ext/poll', { headers: EXT })).status, 204, 'empty poll times out with 204');
+    assert.equal((await req(port, 'GET', '/ext/poll', { headers: { 'x-qcb-token': TOKEN } })).status, 204,
+      'Chrome sends no Origin on extension GETs: allowed with a valid token');
   } finally { await b.close(); }
 });
 
