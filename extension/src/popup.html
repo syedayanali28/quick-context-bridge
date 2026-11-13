@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Quick Context Bridge</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <h1>Quick Context Bridge</h1>
+    <span class="badge">never commits</span>
+  </header>
+
+  <section id="status" class="status">Checking tab…</section>
+
+  <section id="target" hidden>
+    <div class="name" id="autoName"></div>
+    <div class="muted mono" id="autoIds"></div>
+  </section>
+
+  <section id="controls" hidden>
+    <label class="opt"><input type="checkbox" id="optSchemas" checked> Include action catalog (OpenAPI, ~0.8 MB)</label>
+    <label class="opt"><input type="checkbox" id="optRedact"> Redact account IDs &amp; emails <span class="muted">(read-only export)</span></label>
+    <button id="btnExport" class="primary">Export</button>
+    <button id="btnApply" class="wide">Apply changes…</button>
+  </section>
+
+  <section id="result" hidden>
+    <ul id="summary" class="summary"></ul>
+    <div class="row">
+      <button id="btnZip" class="primary">Download .zip</button>
+      <button id="btnFolder">Download folder</button>
+    </div>
+    <div class="row">
+      <button id="btnCopyOutline">Copy outline.md</button>
+      <button id="btnCopyQal">Copy QAL</button>
+      <button id="btnCopyJson">Copy context.json</button>
+    </div>
+    <div id="warn" class="warn" hidden></div>
+  </section>
+
+  <footer class="muted">Export is read-only. "Apply changes" validates, shows a diff, and saves only the Live version after you
+    confirm. It never commits, deploys or runs anything.</footer>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

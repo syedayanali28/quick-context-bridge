@@ -1,0 +1,10 @@
+# Discovery material from the production account (screenshots, full HTML snapshot): never commit
+context/
+
+# Exports contain the full automation source and business logic
+quick-exports/
+*.zip
+
+node_modules/
+.DS_Store
+Thumbs.db

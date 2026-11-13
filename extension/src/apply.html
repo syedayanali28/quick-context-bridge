@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apply changes · Quick Context Bridge</title>
+  <link rel="stylesheet" href="apply.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Apply changes to a Quick automation</h1>
+      <p class="muted">Validates on the server, shows the diff, and saves only the <b>Live</b> version under an edit lock.
+        It never commits, deploys or runs anything.</p>
+    </header>
+
+    <section class="card">
+      <h2>1 · Target</h2>
+      <div id="target" class="muted">Loading…</div>
+      <label class="opt"><input type="checkbox" id="optSandbox"> Apply to a <b>new sandbox copy</b> instead, named
+        <input type="text" id="sandboxName" size="44"></label>
+    </section>
+
+    <section class="card">
+      <h2>2 · New version</h2>
+      <p class="muted">Choose the export folder your agent edited. Its <code>automation.qal.py</code> and
+        <code>export-manifest.json</code> are used for conflict detection. You can also pick files or paste the QAL.</p>
+      <div class="row">
+        <label class="button">Choose export folder…<input type="file" id="pickFolder" webkitdirectory hidden></label>
+        <label class="button">Choose files…<input type="file" id="pickFiles" accept=".py,.json,.txt" multiple hidden></label>
+        <button id="togglePaste">Paste QAL…</button>
+      </div>
+      <textarea id="paste" rows="8" placeholder="Paste the full automation.qal.py here" hidden></textarea>
+      <div id="source" class="muted"></div>
+    </section>
+
+    <section class="card">
+      <h2>3 · Check</h2>
+      <button id="btnCheck" class="primary" disabled>Check changes</button>
+      <div id="checks"></div>
+      <div id="semantic"></div>
+      <details id="diffBox" hidden open>
+        <summary id="diffSummary">Diff</summary>
+        <pre id="diff" class="diff"></pre>
+      </details>
+    </section>
+
+    <section class="card">
+      <h2>4 · Save</h2>
+      <label class="opt" id="overrideRow" hidden><input type="checkbox" id="optOverride"> Overwrite changes made to the
+        Live version since the export</label>
+      <label class="opt"><input type="checkbox" id="optReviewed"> I reviewed the diff</label>
+      <button id="btnSave" class="danger" disabled>Save to Live version</button>
+      <ol id="log" class="log"></ol>
+    </section>
+  </main>
+  <script type="module" src="apply.js"></script>
+</body>
+</html>

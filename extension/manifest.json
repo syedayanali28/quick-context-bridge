@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Quick Context Bridge",
+  "version": "0.2.0",
+  "description": "Export an Amazon Quick Automate automation for AI agents, and apply agent edits back to the Live version (validated, diffed, locked; never commits).",
+  "minimum_chrome_version": "111",
+  "permissions": ["activeTab", "scripting", "downloads", "clipboardWrite"],
+  "host_permissions": ["https://*.quicksight.aws.amazon.com/*"],
+  "action": {
+    "default_title": "Export Quick automation",
+    "default_popup": "src/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.quicksight.aws.amazon.com/*"],
+      "js": ["src/page-hook.js"],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": false
+    }
+  ]
+}

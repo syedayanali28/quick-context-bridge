@@ -1,0 +1,10 @@
+{
+  "name": "quick-context-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Export Amazon Quick Automate automations for AI agents (Chrome extension + tooling).",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  }
+}

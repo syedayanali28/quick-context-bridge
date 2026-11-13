@@ -1,0 +1,33 @@
+:root {
+  --fg: #16191f; --muted: #5f6b7a; --border: #d5dbe1; --bg: #ffffff; --accent: #4200db; --accent-fg: #fff;
+  --ok: #037f0c; --err: #d91515; --warn-bg: #fffbe6; --warn-border: #f2c94c;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --fg: #e9ebed; --muted: #a0a8b3; --border: #3a4250; --bg: #161b22; --accent: #8575ff; --accent-fg: #0b0f14;
+    --warn-bg: #2b2611; --warn-border: #8a6d1f; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 12px 14px; width: 380px; font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--fg); background: var(--bg); }
+header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+h1 { font-size: 15px; margin: 0; }
+.badge { font-size: 11px; padding: 1px 6px; border: 1px solid var(--border); border-radius: 10px; color: var(--muted); }
+section { margin-bottom: 10px; }
+.status { padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; }
+.status.ok { border-color: var(--ok); }
+.status.err { border-color: var(--err); color: var(--err); }
+.name { font-weight: 600; font-size: 14px; }
+.muted { color: var(--muted); }
+.mono { font-family: ui-monospace, Consolas, monospace; font-size: 11px; word-break: break-all; }
+.opt { display: block; margin: 4px 0; }
+.row { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+button { padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; background: transparent; color: var(--fg);
+  cursor: pointer; font: inherit; }
+button:hover { border-color: var(--accent); }
+button:disabled { opacity: .5; cursor: default; }
+button.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+#btnExport, .wide { width: 100%; margin-top: 6px; }
+.summary { margin: 0; padding-left: 18px; }
+.warn { margin-top: 8px; padding: 6px 8px; background: var(--warn-bg); border: 1px solid var(--warn-border); border-radius: 6px;
+  font-size: 12px; white-space: pre-wrap; }
+footer { font-size: 11px; border-top: 1px solid var(--border); padding-top: 6px; }
