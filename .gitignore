@@ -8,3 +8,6 @@ quick-exports/
 node_modules/
 .DS_Store
 Thumbs.db
+
+# Local bridge pairing token
+bridge/.state/

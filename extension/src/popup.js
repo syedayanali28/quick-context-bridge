@@ -158,6 +158,13 @@ async function copy(path) {
 }
 
 $('btnExport').addEventListener('click', doExport);
+$('btnBridge').addEventListener('click', async () => {
+  const url = chrome.runtime.getURL('src/bridge.html');
+  const [existing] = await chrome.tabs.query({ url });
+  if (existing) await chrome.tabs.update(existing.id, { active: true });
+  else await chrome.tabs.create({ url, pinned: true });
+  window.close();
+});
 $('btnApply').addEventListener('click', () => {
   chrome.tabs.create({ url: chrome.runtime.getURL(`src/apply.html?tabId=${tab.id}`) });
   window.close();

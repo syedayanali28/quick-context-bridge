@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent bridge · Quick Context Bridge</title>
+  <link rel="stylesheet" href="apply.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Agent bridge</h1>
+      <p class="muted">Lets a local AI agent (Claude Code, via <code>qcb</code>) read, validate, save the <b>Live</b> version
+        of, copy and test-run Quick automations with your session. It never commits, deploys or deletes.
+        Keep this tab open while the agent works.</p>
+    </header>
+
+    <section class="card">
+      <h2>Connection</h2>
+      <div class="row">
+        <label>Port <input type="text" id="port" size="6" value="8765"></label>
+        <label>Pairing token <input type="text" id="token" size="52" placeholder="from bridge/.state/token"></label>
+      </div>
+      <div class="row">
+        <button id="btnConnect" class="primary">Connect</button>
+        <button id="btnDisconnect" disabled>Disconnect</button>
+        <span id="state" class="chip">disconnected</span>
+      </div>
+      <p class="muted">Quick tabs need to be open and logged in (any automation page). Reload them once after
+        installing or updating the extension.</p>
+    </section>
+
+    <section class="card">
+      <h2>Activity</h2>
+      <ol id="log" class="log"></ol>
+    </section>
+  </main>
+  <script type="module" src="bridge.js"></script>
+</body>
+</html>

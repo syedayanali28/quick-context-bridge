@@ -60,6 +60,30 @@ sits in the QAL itself, such as hard-coded test records with names or policy num
    automation back to verify, and releases the lock.
 7. Open the editor to review, then **Commit** there yourself when ready.
 
+## Agent bridge: let an AI agent do the whole loop
+
+With the bridge, an agent like Claude Code edits an automation, saves it to the Live version, test-runs it,
+reads the logs, and iterates on its own. Every iteration is committed to a private local workspace repo. See
+[CLAUDE.md](CLAUDE.md) for the loop the agent follows.
+
+1. Start the local server: `bash scripts/bridge.sh`. It listens on 127.0.0.1:8765, and the pairing token is in
+   `bridge/.state/token`.
+2. In the extension popup, click **Agent bridge…**. A pinned tab opens. Paste the token and click **Connect**.
+3. Keep one Quick tab open (any automation page). Reload it after installing or updating the extension.
+4. The agent uses the CLI: `bash scripts/qcb.sh status | allow | copy | pull | check | push | run | inspect`.
+
+```
+agent ── qcb (CLI) ──HTTP──▶ bridge/server.mjs ◀──long-poll── extension Bridge tab ──▶ Quick tab (page hook)
+                                 127.0.0.1 + token                                       your session
+```
+
+- **Runs** are TEST-environment runs of the Live version (the same as the editor's Run button). Cases and task
+  queues are kept in separate test-only spaces, but connector steps still call the real systems.
+- **Run records:** `runs/<ts>-<status>/` with `summary.md` (status, failures, log lines, executed steps mapped to
+  canvas display IDs), `digest.json`, `actions.json` and `run.json`.
+- **Policy:** the agent only writes to or runs automations listed in the workspace's `targets.json`
+  (`qcb allow`), or ones with "sandbox" in their name.
+
 ## How it works
 
 - The Quick console talks to `…/sn/account/<acct>/qbsproxy/quicksight/…` using a per-session `mbtc` query token and an
@@ -89,6 +113,11 @@ extension/
   src/apply.{html,css,js} Phase 3 UI: load edited export, check, diff, save Live version
   src/lib/writeback.js    lint, semantic diff, conflict planning, lock → save → verify → release
   src/lib/diff.js         Myers line diff + unified hunks
+  src/bridge.{html,js}    Agent bridge tab: long-polls the local server, relays calls to a Quick tab
+bridge/
+  server.mjs              local relay (127.0.0.1, token, extension-origin check)
+  qcb.mjs                 agent CLI
+  lib/quick.mjs           pull / check / push / copy / run / digest, reusing extension/src/lib
   src/lib/pysrc.js        tiny Python tokenizer helpers (strings, brackets, calls)
   src/lib/qal.js          QAL → flow tree with canvas display IDs
   src/lib/render.js       flow tree → outline.md

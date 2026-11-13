@@ -75,16 +75,23 @@
     ['GET', new RegExp(`^/automation-groups/${ID}/action-groups$`)],
     ['POST', new RegExp(`^/automation-groups/${ID}/action-groups/batch$`)],
     ['POST', new RegExp(`^/automation-groups/${ID}/associations/list$`)],
+    // Run inspection (POST but read-only)
+    ['POST', /^\/get\/automation-groups\/workflow-executions$/],
+    ['POST', new RegExp(`^/automation-groups/${ID}/get-workflow-action-execution$`)],
+    ['POST', /^\/search\/automation-groups\/automation-runs$/],
   ];
 
-  // Phase 3 write-back. Deliberately excluded: commit (POST ~/versions/{v}), deploy, delete, run/start, triggers.
-  // Saving only ever touches the Live (draft) version.
+  // Write-back + test runs. Deliberately excluded: commit (POST ~/versions/{v}), deploy, delete, triggers,
+  // deployed-job APIs. Saving only ever touches the Live (draft) version; runs are TEST-environment runs.
   const WRITE = [
     ['POST', new RegExp(`^${AUTO}/validate-automation$`)], // server-side compile check, saves nothing
     ['POST', new RegExp(`^${AUTO}/acquire-lock$`)],
     ['POST', new RegExp(`^${AUTO}/release-lock$`)],
     ['PUT', new RegExp(`^${AUTO}/workflows$`)], // save Live version (optimistic concurrency via lastModifiedTime)
     ['POST', new RegExp(`^${AUTO}/copy$`)], // create a sandbox copy
+    // Test runs of the Live version (environment TEST), started only by the local agent bridge
+    ['POST', /^\/start\/automation-groups\/workflow-executions$/],
+    ['PUT', /^\/workflow-executions\/automation-groups$/], // debug commands, e.g. stop a test run
   ];
 
   const allowedIn = (list, method, path) => list.some(([m, re]) => m === method && re.test(path));
