@@ -140,12 +140,33 @@ async function loop() {
   }
 }
 
+// chrome.storage needs the "storage" permission; fall back to localStorage if the extension wasn't reloaded.
+const store = {
+  async get(keys) {
+    if (chrome.storage && chrome.storage.local) return chrome.storage.local.get(keys);
+    const o = {};
+    for (const k of keys) { try { const v = localStorage.getItem(k); if (v !== null) o[k] = JSON.parse(v); } catch { /* ignore */ } }
+    return o;
+  },
+  async set(obj) {
+    if (chrome.storage && chrome.storage.local) return chrome.storage.local.set(obj);
+    for (const [k, v] of Object.entries(obj)) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* ignore */ } }
+  },
+};
+
 function start() {
   if (running) return;
+  const token = $('token').value.trim();
+  if (!/^[0-9a-f]{48}$/.test(token)) {
+    log(token ? 'That is not a pairing token (expected 48 hex characters). Copy it from bridge/.state/token.' : 'Paste the pairing token first.', 'err');
+    $('token').focus();
+    return;
+  }
+  $('token').value = token;
   running = true;
   $('btnConnect').disabled = true;
   $('btnDisconnect').disabled = false;
-  chrome.storage.local.set({ bridgePort: $('port').value, bridgeToken: $('token').value.trim(), bridgeAuto: true });
+  store.set({ bridgePort: $('port').value, bridgeToken: token, bridgeAuto: true });
   loop();
 }
 
@@ -158,9 +179,10 @@ function stop() {
 }
 
 $('btnConnect').addEventListener('click', start);
-$('btnDisconnect').addEventListener('click', () => { chrome.storage.local.set({ bridgeAuto: false }); stop(); log('Disconnected'); });
+$('btnDisconnect').addEventListener('click', () => { store.set({ bridgeAuto: false }); stop(); log('Disconnected'); });
+$('token').addEventListener('keydown', (e) => { if (e.key === 'Enter') start(); });
 
-chrome.storage.local.get(['bridgePort', 'bridgeToken', 'bridgeAuto']).then((s) => {
+store.get(['bridgePort', 'bridgeToken', 'bridgeAuto']).then((s) => {
   if (s.bridgePort) $('port').value = s.bridgePort;
   if (s.bridgeToken) $('token').value = s.bridgeToken;
   if (s.bridgeAuto && s.bridgeToken) start();
