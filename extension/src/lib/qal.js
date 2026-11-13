@@ -106,7 +106,9 @@ export function parseQal(src) {
         const first = bodyLines[0].code.trim();
         try {
           const s = readPyString(first, 0);
-          block.source = dedent(s.value.replace(/^python[ \t]*\r?\n/, '')).replace(/\s+$/, '') + '\n';
+          // Quick treats the '''python … ''' body as raw source text (not a Python string), so use the raw
+          // body: decoding escapes would turn "\n" / b"\xff" inside the user's code into real characters.
+          block.source = dedent(s.body.replace(/^python[ \t]*\r?\n/, '')).replace(/\s+$/, '') + '\n';
         } catch {
           block.source = dedent(bodyLines.map((b) => b.code).join('\n')) + '\n';
           result.warnings.push(`Code block ${block.id}: body is not a '''python string`);

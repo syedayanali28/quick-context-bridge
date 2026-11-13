@@ -142,6 +142,13 @@ test('node details: action, agent, deactivated, loop, exception flow, end', () =
   assert.equal(ifValid.condition, 'validation["valid"]');
 });
 
+test('code block source keeps escape sequences verbatim (raw source, not a decoded string)', () => {
+  const src = "def main():\n    with host() as h:\n        pass\n\n@code_block(title=\"function_aaaaaa\")\n"
+    + "def function_aaaaaa(t):\n    '''python\n    t = t.replace(\"\\n\", \"\")\n    if t[0:2] != b\"\\xff\\xd8\":\n        return t\n    '''\n\n__qal_version__(2,0,0)\n";
+  const p = parseQal(src);
+  assert.equal(p.codeBlocks[0].source, 't = t.replace("\\n", "")\nif t[0:2] != b"\\xff\\xd8":\n    return t\n');
+});
+
 test('custom-mode agent exposes its model id', () => {
   const src = 'def main():\n    with host() as h:\n        _("r").lhs = agents.agents.use_inline_agent(instruction=_("\\"hi\\""), '
     + 'agent_mode=_("{\\"mode\\": \\"custom\\", \\"config\\": {\\"model_id\\": \\"us.anthropic.claude-3-5-sonnet-20241022-v2:0\\"}}"), '
